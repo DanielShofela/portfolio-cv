@@ -9,7 +9,8 @@ interface PortfolioCardProps {
 const PortfolioCard: React.FC<PortfolioCardProps> = ({ category, onSelectCategory }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col transform hover:-translate-y-2 transition-transform duration-300">
-      <img src={category.heroImage} alt={category.title} className="w-full h-48 object-cover" />
+  {/* Use object-contain and h-auto so image keeps its aspect ratio and adapts to its natural size. */}
+  <img src={category.heroImage} alt={category.title} className="w-full h-auto object-contain max-h-56" />
       <div className="p-6 flex-grow flex flex-col">
         <h3 className="text-xl font-bold mb-2 text-brand-blue">{category.title}</h3>
         <p className="text-gray-600 text-base flex-grow">{category.description}</p>

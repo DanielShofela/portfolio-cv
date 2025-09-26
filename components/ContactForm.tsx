@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 
 interface ContactFormProps {
   modelId: number;
-  onSubmit: (formData: { name: string; email: string; phone: string; message: string; }) => void;
+  modelName?: string;
+  onSubmit: (formData: { name: string; email: string; phone: string; message: string; modelName?: string }) => void;
 }
 
-const ContactForm: React.FC<ContactFormProps> = ({ modelId, onSubmit }) => {
+const ContactForm: React.FC<ContactFormProps> = ({ modelId, modelName, onSubmit }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -18,14 +19,62 @@ const ContactForm: React.FC<ContactFormProps> = ({ modelId, onSubmit }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    onSubmit(formData);
+    setStatus('loading');
+
+    // send to Formspree
+    try {
+      const payload = new FormData();
+      payload.append('modelId', String(modelId));
+      if (modelName) payload.append('modelName', modelName);
+      payload.append('name', formData.name);
+      payload.append('email', formData.email);
+      payload.append('phone', formData.phone);
+      payload.append('message', formData.message);
+
+      const res = await fetch('https://formspree.io/f/mblaqgej', {
+        method: 'POST',
+        body: payload,
+        // Request JSON response to avoid Formspree redirecting to /thanks (which triggers CORS)
+        headers: {
+          Accept: 'application/json',
+        } as any,
+      });
+
+      if (!res.ok) {
+        // try to parse json error message if available
+        let errText = `Formspree error: ${res.status}`;
+        try {
+          const json = await res.json();
+          if (json && json.error) errText = json.error;
+        } catch (_) {}
+        throw new Error(errText);
+      }
+
+      // parse response JSON to inspect Formspree reply
+      try {
+        const json = await res.json();
+        console.log('Formspree response:', json);
+      } catch (e) {
+        console.warn('Could not parse Formspree JSON response:', e);
+      }
+
+      setStatus('success');
+      onSubmit({ ...formData, modelName });
+      // clear form after successful send
+      setFormData({ name: '', email: '', phone: '', message: '' });
+    } catch (err) {
+      console.error(err);
+      setStatus('error');
+    }
   };
 
   return (
     <div className="mt-10 max-w-2xl mx-auto p-8 bg-gray-100 rounded-lg shadow-inner">
-        <h2 className="text-2xl font-bold text-brand-blue mb-6 text-center">Demande pour le modèle #{modelId}</h2>
+  <h2 className="text-2xl font-bold text-brand-blue mb-6 text-center">Demande pour le modèle #{modelId}{modelName ? ` — ${modelName}` : ''}</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
             <input type="hidden" name="modelId" value={modelId} />
             <div>
@@ -74,13 +123,14 @@ const ContactForm: React.FC<ContactFormProps> = ({ modelId, onSubmit }) => {
                     className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-brand-orange focus:border-brand-orange sm:text-sm"
                 ></textarea>
             </div>
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                    type="submit"
-                    className="w-full sm:w-auto inline-flex justify-center py-3 px-6 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-brand-orange hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange transition duration-300"
-                >
-                    Envoyer ma demande
-                </button>
+      <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button
+          type="submit"
+          disabled={status === 'loading'}
+          className={`w-full sm:w-auto inline-flex justify-center py-3 px-6 border border-transparent rounded-full shadow-sm text-sm font-medium text-white ${status === 'loading' ? 'bg-gray-400 cursor-not-allowed' : 'bg-brand-orange hover:bg-orange-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-orange transition duration-300`}
+        >
+          {status === 'loading' ? 'Envoi...' : 'Envoyer ma demande'}
+        </button>
                 <a
                   href="https://sdformulaire-cv.netlify.app/"
                   target="_blank"
@@ -91,6 +141,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ modelId, onSubmit }) => {
                 </a>
             </div>
         </form>
+        <div className="mt-4 text-center">
+          {status === 'success' && <p className="text-green-600 font-medium">Merci — votre message a bien été envoyé.</p>}
+          {status === 'error' && <p className="text-red-600 font-medium">Une erreur est survenue lors de l'envoi. Réessayez plus tard.</p>}
+        </div>
     </div>
   );
 };

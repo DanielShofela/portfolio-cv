@@ -12,7 +12,7 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
-  const handleFormSubmit = (formData: { name: string; email: string; phone: string; message: string; }) => {
+  const handleFormSubmit = (formData: { name: string; email: string; phone: string; message: string; modelName?: string }) => {
     console.log("Form submitted for model:", {
       modelId: model.id,
       category: category.title,
@@ -35,7 +35,16 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
         </div>
 
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl md:text-4xl font-bold text-brand-blue text-center mb-8">{model.alt}</h1>
+            {/* derive model name from filename if available */}
+            {/** model.imageSrc expected like '.../CV 001H.png' */}
+            {(() => {
+              const parts = model.imageSrc.split('/');
+              const file = parts[parts.length - 1] || model.alt;
+              const name = file.replace(/\.[^/.]+$/, '');
+              return (
+                <h1 className="text-3xl md:text-4xl font-bold text-brand-blue text-center mb-8">Modèle de {name}</h1>
+              );
+            })()}
             <div className="bg-white p-4 rounded-lg shadow-xl mb-8 border border-gray-200">
               <img src={model.imageSrc} alt={model.alt} className="w-full h-auto rounded-lg" />
             </div>
@@ -58,7 +67,13 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
                 )}
             </div>
             
-            {isFormOpen && <ContactForm modelId={model.id} onSubmit={handleFormSubmit} />}
+            {isFormOpen && (
+              <ContactForm
+                modelId={model.id}
+                modelName={(model.imageSrc.split('/').pop() || model.alt).replace(/\.[^/.]+$/, '')}
+                onSubmit={handleFormSubmit}
+              />
+            )}
         </div>
       </div>
     </section>
