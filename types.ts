@@ -2,6 +2,8 @@ export interface Model {
   id: number;
   imageSrc: string;
   alt: string;
+  // Optional list of all images for a model (useful for gallery/carousels)
+  images?: string[];
 }
 
 export interface PortfolioCategory {
