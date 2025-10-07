@@ -1,5 +1,5 @@
 export interface Model {
-  id: number;
+  id: number | string;
   imageSrc: string;
   alt: string;
   // Optional list of all images for a model (useful for gallery/carousels)

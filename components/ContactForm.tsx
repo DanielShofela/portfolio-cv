@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 interface ContactFormProps {
-  modelId: number;
+  modelId: number | string;
   modelName?: string;
   onSubmit: (formData: { name: string; email: string; phone: string; message: string; modelName?: string }) => void;
 }

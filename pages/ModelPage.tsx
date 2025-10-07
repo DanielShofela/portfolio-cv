@@ -40,14 +40,8 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
         <div className="max-w-4xl mx-auto">
             {/* derive model name from filename if available */}
             {/** model.imageSrc expected like '.../CV 001H.png' */}
-            {(() => {
-              const parts = model.imageSrc.split('/');
-              const file = parts[parts.length - 1] || model.alt;
-              const name = file.replace(/\.[^/.]+$/, '');
-              return (
-                <h1 className="text-3xl md:text-4xl font-bold text-brand-blue text-center mb-8">Modèle de {name}</h1>
-              );
-            })()}
+            {/* Use folder-based alt (model.alt) as the model name for a cleaner title */}
+            <h1 className="text-3xl md:text-4xl font-bold text-brand-blue text-center mb-8">Modèle — {model.alt}</h1>
             <div className="bg-white p-4 rounded-lg shadow-xl mb-4 border border-gray-200">
               <img src={images[selectedIndex]} alt={model.alt} className="w-full h-auto rounded-lg" />
             </div>
@@ -89,7 +83,7 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
             {isFormOpen && (
               <ContactForm
                 modelId={model.id}
-                modelName={(model.imageSrc.split('/').pop() || model.alt).replace(/\.[^/.]+$/, '')}
+                modelName={model.alt}
                 onSubmit={handleFormSubmit}
               />
             )}
