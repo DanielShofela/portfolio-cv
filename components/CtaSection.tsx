@@ -16,13 +16,13 @@ const CtaSection: React.FC = () => {
           Vous souhaitez un CV percutant ou une identité visuelle professionnelle ? Contactez-nous dès aujourd’hui.
         </h2>
         <a
-          href="https://wa.me/yourwhatsappnumber"
+          href="https://wa.me/22574278818"
           target="_blank"
           rel="noopener noreferrer"
           className="bg-brand-orange text-white font-bold py-4 px-8 rounded-full hover:bg-orange-600 transition duration-300 ease-in-out transform hover:scale-105 inline-flex items-center justify-center"
         >
           <WhatsAppIcon />
-          <span>Contacter sur WhatsApp</span>
+          <span>Contacter sur WhatsApp (+225 74 27 88 18)</span>
         </a>
       </div>
     </section>
