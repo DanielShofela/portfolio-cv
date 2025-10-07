@@ -11,6 +11,9 @@ interface ModelPageProps {
 const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  // gallery state: show additional images if provided by the model
+  const images = (model.images && model.images.length > 0) ? model.images : [model.imageSrc];
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleFormSubmit = (formData: { name: string; email: string; phone: string; message: string; modelName?: string }) => {
     console.log("Form submitted for model:", {
@@ -45,9 +48,25 @@ const ModelPage: React.FC<ModelPageProps> = ({ category, model, onBack }) => {
                 <h1 className="text-3xl md:text-4xl font-bold text-brand-blue text-center mb-8">Modèle de {name}</h1>
               );
             })()}
-            <div className="bg-white p-4 rounded-lg shadow-xl mb-8 border border-gray-200">
-              <img src={model.imageSrc} alt={model.alt} className="w-full h-auto rounded-lg" />
+            <div className="bg-white p-4 rounded-lg shadow-xl mb-4 border border-gray-200">
+              <img src={images[selectedIndex]} alt={model.alt} className="w-full h-auto rounded-lg" />
             </div>
+
+            {/* Thumbnails / gallery navigation */}
+            {images.length > 1 && (
+              <div className="flex items-center justify-center gap-3 mb-8 overflow-x-auto">
+                {images.map((src, idx) => (
+                  <button
+                    key={src + idx}
+                    onClick={() => setSelectedIndex(idx)}
+                    className={`rounded-md overflow-hidden border ${selectedIndex === idx ? 'border-brand-orange ring-2 ring-brand-orange' : 'border-gray-200'} focus:outline-none`}
+                    aria-label={`Afficher l'image ${idx + 1}`}
+                  >
+                    <img src={src} alt={`${model.alt} - ${idx + 1}`} className="h-20 w-32 object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="text-center">
                 {isFormSubmitted ? (
